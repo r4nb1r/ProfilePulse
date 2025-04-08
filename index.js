@@ -3,7 +3,9 @@ const { google } = require('googleapis');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+
+// Use Render’s port or 3000 locally
+const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -28,7 +30,8 @@ app.get('/auth/callback', async (req, res) => {
   res.send('Authentication successful! Close this tab.');
 });
 
-const businessProfile = google.mybusiness('v4', { auth: oauth2Client });
+// Use the correct API for Business Information
+const businessProfile = google.mybusinessbusinessinformation({ version: 'v1', auth: oauth2Client });
 
 async function claimGBP(businessName, address) {
   const response = await businessProfile.accounts.list();
@@ -38,7 +41,7 @@ async function claimGBP(businessName, address) {
     title: businessName,
     address: { addressLines: [address] },
   };
-  await businessProfile.accounts.locations.create({
+  await businessProfile.locations.create({
     parent: account,
     requestBody: location,
   });
@@ -56,5 +59,5 @@ app.post('/submit', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
