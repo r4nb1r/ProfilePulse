@@ -1,0 +1,212 @@
+"Create a fully automated 'Done-For-You' Google Business Profile (GBP) Manager SaaS application called 'GrowZap' using Node.js on Replit. This app automates claiming and optimizing GBP listings for local businesses. Use Express for the server, googleapis for Google Business Profile API integration, and dotenv for environment variables. Build it with no upfront costs, using free tools only. Follow these exact steps:
+
+Setup: Initialize a Node.js project with npm init -y and install dependencies: express, googleapis, and dotenv. Add a start script in package.json: 'start': 'node index.js'.
+File Structure: Create index.js as the main server file, .env for API keys (with placeholders for CLIENT_ID, CLIENT_SECRET, REDIRECT_URI), and a public/ folder with index.html.
+Google API Integration: Set up OAuth 2.0 authentication with the Google Business Profile API. Include routes /auth to generate an auth URL and /auth/callback to handle the callback and store tokens. Use scope https://www.googleapis.com/auth/business.manage.
+Core Functions:
+Write a claimGBP(businessName, address) function to claim a GBP listing using the Google API.
+Write an optimizeGBP(locationId) function to update the listing with a primary category (gcid:local_business) and hours (Monday 9 AM - 5 PM).
+Frontend: Create public/index.html with a form taking businessName and address inputs, styled minimally, submitting to /submit (POST).
+Server Logic:
+Serve the HTML at /.
+Handle /submit (POST) to call claimGBP() with form data and return a success message.
+Add a /test (GET) route to call claimGBP('Test Business', '123 Main St').
+Run: Ensure the app runs on port 3000 and works on Replit’s public URL.
+Here’s the exact code:
+
+.env:
+text
+
+Collapse
+
+Wrap
+
+Copy
+CLIENT_ID=your-client-id
+CLIENT_SECRET=your-client-secret
+REDIRECT_URI=https://your-hosting-url/auth/callback
+index.js:
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+const express = require('express');
+const { google } = require('googleapis');
+require('dotenv').config();
+
+const app = express();
+const port = 3000;
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.CLIENT_ID,
+  process.env.CLIENT_SECRET,
+  process.env.REDIRECT_URI
+);
+
+const scopes = ['https://www.googleapis.com/auth/business.manage'];
+
+app
+
+
+
+
+
+
+Interrupted
+re write it so that you make the name profile pulse
+
+
+
+2 / 2
+
+
+
+Below is the revised prompt with the name changed to "ProfilePulse" instead of "GrowZap." This prompt can be pasted directly into the Replit AI chatbot to create your "Done-For-You" Google Business Profile Manager SaaS. After the prompt, I’ll guide you through exporting it from Replit and hosting it on a free platform (Render) with no upfront costs.
+
+Prompt for Replit AI
+Paste this directly into the Replit AI chatbot:
+
+"Create a fully automated 'Done-For-You' Google Business Profile (GBP) Manager SaaS application called 'ProfilePulse' using Node.js on Replit. This app automates claiming and optimizing GBP listings for local businesses. Use Express for the server, googleapis for Google Business Profile API integration, and dotenv for environment variables. Build it with no upfront costs, using free tools only. Follow these exact steps:
+
+Setup: Initialize a Node.js project with npm init -y and install dependencies: express, googleapis, and dotenv. Add a start script in package.json: 'start': 'node index.js'.
+File Structure: Create index.js as the main server file, .env for API keys (with placeholders for CLIENT_ID, CLIENT_SECRET, REDIRECT_URI), and a public/ folder with index.html.
+Google API Integration: Set up OAuth 2.0 authentication with the Google Business Profile API. Include routes /auth to generate an auth URL and /auth/callback to handle the callback and store tokens. Use scope https://www.googleapis.com/auth/business.manage.
+Core Functions:
+Write a claimGBP(businessName, address) function to claim a GBP listing using the Google API.
+Write an optimizeGBP(locationId) function to update the listing with a primary category (gcid:local_business) and hours (Monday 9 AM - 5 PM).
+Frontend: Create public/index.html with a form taking businessName and address inputs, styled minimally, submitting to /submit (POST).
+Server Logic:
+Serve the HTML at /.
+Handle /submit (POST) to call claimGBP() with form data and return a success message.
+Add a /test (GET) route to call claimGBP('Test Business', '123 Main St').
+Run: Ensure the app runs on port 3000 and works on Replit’s public URL.
+Here’s the exact code:
+
+.env:
+text
+
+Collapse
+
+Wrap
+
+Copy
+CLIENT_ID=your-client-id
+CLIENT_SECRET=your-client-secret
+REDIRECT_URI=https://your-hosting-url/auth/callback
+index.js:
+javascript
+
+Collapse
+
+Wrap
+
+Copy
+const express = require('express');
+const { google } = require('googleapis');
+require('dotenv').config();
+
+const app = express();
+const port = 3000;
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.CLIENT_ID,
+  process.env.CLIENT_SECRET,
+  process.env.REDIRECT_URI
+);
+
+const scopes = ['https://www.googleapis.com/auth/business.manage'];
+
+app.get('/auth', (req, res) => {
+  const url = oauth2Client.generateAuthUrl({ scope: scopes });
+  res.redirect(url);
+});
+
+app.get('/auth/callback', async (req, res) => {
+  const { code } = req.query;
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+  res.send('Authentication successful! Close this tab.');
+});
+
+const businessProfile = google.mybusiness('v4', { auth: oauth2Client });
+
+async function claimGBP(businessName, address) {
+  const response = await businessProfile.accounts.list();
+  const account = response.data.accounts[0].name;
+  const location = {
+    storeCode: businessName.replace(/\s/g, '-'),
+    title: businessName,
+    address: { addressLines: [address] },
+  };
+  await businessProfile.accounts.locations.create({
+    parent: account,
+    requestBody: location,
+  });
+  console.log('GBP claimed!');
+}
+
+async function optimizeGBP(locationId) {
+  await businessProfile.accounts.locations.patch({
+    name: locationId,
+    requestBody: {
+      primaryCategory: { categoryId: 'gcid:local_business' },
+      regularHours: {
+        periods: [{ openDay: 'MONDAY', openTime: '09:00', closeDay: 'MONDAY', closeTime: '17:00' }],
+      },
+    },
+  });
+  console.log('GBP optimized!');
+}
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+app.post('/submit', async (req, res) => {
+  const { businessName, address } = req.body;
+  await claimGBP(businessName, address);
+  res.send('Business submitted for GBP automation!');
+});
+
+app.get('/test', async (req, res) => {
+  await claimGBP('Test Business', '123 Main St');
+  res.send('Test completed');
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
+public/index.html:
+html
+
+Preview
+
+Collapse
+
+Wrap
+
+Copy
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ProfilePulse</title>
+</head>
+<body>
+  <h1>Automate Your Google Business Profile with ProfilePulse</h1>
+  <form action="/submit" method="POST">
+    <input type="text" name="businessName" placeholder="Business Name" required>
+    <input type="text" name="address" placeholder="Address" required>
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
+After generating this, ensure it runs on Replit and is ready to export. I’ll need real Google API credentials in .env later, but don’t set them up yet—just build the app."
