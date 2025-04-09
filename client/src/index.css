@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border; // Changed to use 'border' from tailwind.config.ts
   }
 
   body {
