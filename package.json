@@ -15,7 +15,8 @@
     "wouter": "^3.0.0",
     "@radix-ui/react-toast": "^1.2.1",
     "lucide-react": "^0.441.0",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "class-variance-authority": "^0.7.0"
   },
   "devDependencies": {
     "vite": "^5.0.0",
